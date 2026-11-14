@@ -6,7 +6,7 @@ A fast, standalone Windows program for converting audio files from one format to
 
 - **Drag and drop.** Drop files or folders onto the window, or use **Add files** and **Add folder**. Folders can include their subfolders.
 - **Reads almost any audio format.** MP3, WAV, FLAC, AIFF, M4A/AAC, OGG, Opus, WMA, WavPack, APE, CAF, AMR, AU, MKA, DSD and more.
-- **Converts to** MP3, AAC (M4A), FLAC, ALAC (M4A), WAV, AIFF, OGG Vorbis, Opus and WMA.
+- **Converts to** MP3, AAC (M4A), FLAC, ALAC (M4A), WAV, AIFF, OGG Vorbis, Opus, WMA, MP2, AC-3, E-AC-3, AMR, WavPack, TTA, CAF and AU.
 - **Correct options per format.** Bitrate for lossy formats, bit depth and sample rate for lossless ones, a quality slider for OGG Vorbis, and optional mono/stereo.
 - **Tags stay put.** Artist, album and track data, cover art and chapters are carried across where the target format supports them.
 - **Honest about quality.** Converting a lossy file to a lossless format makes it bigger, not better — the app says so before you start.
@@ -17,6 +17,7 @@ A fast, standalone Windows program for converting audio files from one format to
 ## Notes
 
 - This tool is for audio only. Images, documents and video files are skipped.
+- WMA is limited to 48 kHz and two channels; higher-rate or surround sources are converted down to fit.
 - Converting from a lossy format (MP3, AAC, OGG, Opus, WMA) to a lossless one (FLAC, ALAC, WAV, AIFF) cannot restore what was already thrown away.
 - Everything happens on your own computer. No audio is uploaded anywhere.
 
