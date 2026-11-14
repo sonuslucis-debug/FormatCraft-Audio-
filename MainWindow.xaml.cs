@@ -25,6 +25,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Icon = Branding.AppIcon();
         QueueGrid.ItemsSource = _items;
         Loaded += (_, _) => LoadFormats();
     }

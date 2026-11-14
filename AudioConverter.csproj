@@ -9,14 +9,16 @@
     <AssemblyName>FormatCraftAudio</AssemblyName>
     <RootNamespace>AudioConverter</RootNamespace>
     <Version>0.1.0</Version>
-    <ApplicationIcon>Images\app.ico</ApplicationIcon>
+
+    <!-- Artwork is optional: a missing image must never stop the build. -->
+    <ApplicationIcon Condition="Exists('Images\app.ico')">Images\app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <Resource Include="Fonts\Montserrat-Regular.ttf" />
-    <Resource Include="Fonts\Montserrat-Bold.ttf" />
-    <Resource Include="Images\logo.png" />
-    <Resource Include="Images\app.ico" />
+    <Resource Include="Fonts\Montserrat-Regular.ttf" Condition="Exists('Fonts\Montserrat-Regular.ttf')" />
+    <Resource Include="Fonts\Montserrat-Bold.ttf" Condition="Exists('Fonts\Montserrat-Bold.ttf')" />
+    <Resource Include="Images\logo.png" Condition="Exists('Images\logo.png')" />
+    <Resource Include="Images\app.ico" Condition="Exists('Images\app.ico')" />
   </ItemGroup>
 
   <!-- ffmpeg.exe is downloaded by the GitHub workflow and embedded into the single-file exe.

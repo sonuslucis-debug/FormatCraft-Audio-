@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace AudioConverter;
 
@@ -20,7 +19,7 @@ public sealed class AboutWindow : Window
         ResizeMode = ResizeMode.NoResize;
         WindowStartupLocation = WindowStartupLocation.CenterOwner;
         ShowInTaskbar = false;
-        Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Images/app.ico", UriKind.Absolute));
+        Icon = Branding.AppIcon();
         FontFamily = (FontFamily)Application.Current.FindResource("BrandFont");
 
         var version = Assembly.GetExecutingAssembly().GetName().Version;
@@ -28,14 +27,18 @@ public sealed class AboutWindow : Window
 
         var panel = new StackPanel { Margin = new Thickness(26) };
 
-        var logo = new Image
-        {
-            Source = new BitmapImage(new Uri("pack://application:,,,/Images/logo.png", UriKind.Absolute)),
-            Width = 104,
-            Height = 104,
-            Margin = new Thickness(0, 0, 20, 0)
-        };
-        RenderOptions.SetBitmapScalingMode(logo, BitmapScalingMode.HighQuality);
+        var logo = Branding.Logo() is { } logoSource
+            ? new Image
+            {
+                Source = logoSource,
+                Width = 104,
+                Height = 104,
+                Margin = new Thickness(0, 0, 20, 0)
+            }
+            : null;
+
+        if (logo != null)
+            RenderOptions.SetBitmapScalingMode(logo, BitmapScalingMode.HighQuality);
 
         var titles = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
         titles.Children.Add(new TextBlock
@@ -53,7 +56,7 @@ public sealed class AboutWindow : Window
         });
 
         var header = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 20) };
-        header.Children.Add(logo);
+        if (logo != null) header.Children.Add(logo);
         header.Children.Add(titles);
         panel.Children.Add(header);
 
