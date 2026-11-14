@@ -1,0 +1,43 @@
+name: Build FormatCraft Audio
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      # A static build: one self-contained ffmpeg.exe, which is then embedded into the app's exe.
+      - name: Fetch static ffmpeg
+        shell: pwsh
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP "ffmpeg.zip"
+          Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile $zip
+          Expand-Archive -LiteralPath $zip -DestinationPath (Join-Path $env:RUNNER_TEMP "ffmpeg") -Force
+          $exe = Get-ChildItem -LiteralPath (Join-Path $env:RUNNER_TEMP "ffmpeg") -Recurse -Filter ffmpeg.exe | Select-Object -First 1
+          if (-not $exe) { throw "ffmpeg.exe was not found in the downloaded archive." }
+          New-Item -ItemType Directory -Force -Path "Tools" | Out-Null
+          Copy-Item -LiteralPath $exe.FullName -Destination "Tools\ffmpeg.exe" -Force
+          & "Tools\ffmpeg.exe" -version | Select-Object -First 1
+
+      - name: Publish single-file exe
+        run: >
+          dotnet publish AudioConverter.csproj -c Release -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:EnableCompressionInSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -o publish
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FormatCraftAudio-win-x64
+          path: publish/FormatCraftAudio.exe
