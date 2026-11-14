@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>FormatCraftAudio</AssemblyName>
+    <RootNamespace>AudioConverter</RootNamespace>
+    <Version>0.1.0</Version>
+    <ApplicationIcon>Images\app.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Fonts\Montserrat-Regular.ttf" />
+    <Resource Include="Fonts\Montserrat-Bold.ttf" />
+    <Resource Include="Images\logo.png" />
+    <Resource Include="Images\app.ico" />
+  </ItemGroup>
+
+  <!-- ffmpeg.exe is downloaded by the GitHub workflow and embedded into the single-file exe.
+       It is deliberately not in source control; see .gitignore. -->
+  <ItemGroup Condition="Exists('Tools\ffmpeg.exe')">
+    <EmbeddedResource Include="Tools\ffmpeg.exe" />
+  </ItemGroup>
+
+</Project>

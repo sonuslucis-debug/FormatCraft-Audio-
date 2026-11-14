@@ -1,0 +1,26 @@
+FormatCraft [Audio] - third-party notices
+==========================================
+
+FFmpeg
+------
+Audio conversion is performed by FFmpeg (https://ffmpeg.org), bundled inside the
+application as a static ffmpeg.exe.
+
+The build used by the release workflow is the "essentials" build from
+https://www.gyan.dev/ffmpeg/builds/ which contains GPL-licensed components and is
+therefore distributed under the GNU General Public License version 3.
+
+FFmpeg source code: https://ffmpeg.org/download.html
+Licence texts:      https://ffmpeg.org/legal.html
+Build sources:      https://www.gyan.dev/ffmpeg/builds/
+
+If you redistribute this application, the GPL requires that you also make the
+corresponding FFmpeg source code available and include the licence text.
+
+
+Montserrat
+----------
+Typeface: Montserrat, by The Montserrat Project Authors.
+Licensed under the SIL Open Font License, Version 1.1.
+Full licence text: Fonts/OFL.txt
+Project: https://github.com/JulietaUla/Montserrat
