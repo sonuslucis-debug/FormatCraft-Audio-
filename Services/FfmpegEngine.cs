@@ -66,49 +66,79 @@ public sealed class FfmpegEngine : IAudioEngine
             a.AddRange(new[] { "-map_metadata", "-1", "-map_chapters", "-1" });
         }
 
-        if (o.SampleRate > 0)
+        // Some encoders accept a narrower range than the source (WMA is 48 kHz stereo at most).
+        // Clamp instead of failing: refusing a file that could otherwise convert helps nobody.
+        int sampleRate = o.SampleRate;
+        if (o.Target.MaxSampleRate > 0)
+            sampleRate = sampleRate > 0 ? Math.Min(sampleRate, o.Target.MaxSampleRate) : o.Target.MaxSampleRate;
+
+        if (sampleRate > 0)
         {
             a.Add("-ar");
-            a.Add(o.SampleRate.ToString());
+            a.Add(sampleRate.ToString());
         }
 
-        if (o.Channels == ChannelMode.Mono)
+        int channels = o.Channels switch
+        {
+            ChannelMode.Mono => 1,
+            ChannelMode.Stereo => 2,
+            _ => 0
+        };
+        if (channels == 0) channels = o.Target.MaxChannels;
+
+        if (channels > 0)
         {
             a.Add("-ac");
-            a.Add("1");
+            a.Add(channels.ToString());
         }
-        else if (o.Channels == ChannelMode.Stereo)
-        {
-            a.Add("-ac");
-            a.Add("2");
-        }
+
+        int bitrate = o.BitrateKbps;
+        if (o.Target.MaxBitrateKbps > 0) bitrate = Math.Min(bitrate, o.Target.MaxBitrateKbps);
 
         switch (o.Target.Family)
         {
             case "mp3":
                 a.Add("-c:a"); a.Add("libmp3lame");
-                a.Add("-b:a"); a.Add($"{o.BitrateKbps}k");
+                a.Add("-b:a"); a.Add($"{bitrate}k");
                 break;
 
             case "aac":
                 a.Add("-c:a"); a.Add("aac");
-                a.Add("-b:a"); a.Add($"{o.BitrateKbps}k");
+                a.Add("-b:a"); a.Add($"{bitrate}k");
                 break;
 
             case "flac":
                 a.Add("-c:a"); a.Add("flac");
                 a.Add("-compression_level"); a.Add("5");
-                AddSampleFormat(a, o.BitDepth);
+                AddSampleFormat(a, o.BitDepth, planar: false);
                 break;
 
             case "alac":
                 a.Add("-c:a"); a.Add("alac");
-                AddSampleFormat(a, o.BitDepth);
+                // ALAC only accepts planar formats (s16p / s32p); packed ones are rejected outright.
+                AddSampleFormat(a, o.BitDepth, planar: true);
+                break;
+
+            case "wavpack":
+                // WavPack rejects a frame size under 128 samples, and ffmpeg sizes the encoder's frames from the
+                // first decoded frame. Gapless trimming in MP3/AAC can leave that first frame tiny (an MP3 often
+                // starts with 47 samples), which fails with "invalid block size". Re-chunking to a fixed block
+                // size avoids it; the filter is lossless, so the audio stays sample-for-sample identical.
+                a.Add("-af"); a.Add("asetnsamples=n=8192:p=0");
+                a.Add("-c:a"); a.Add("wavpack");
+                a.Add("-compression_level"); a.Add("5");
+                // WavPack is the opposite way round: it only takes planar formats.
+                AddSampleFormat(a, o.BitDepth, planar: true);
+                break;
+
+            case "tta":
+                a.Add("-c:a"); a.Add("tta");
+                AddSampleFormat(a, o.BitDepth, planar: false);
                 break;
 
             case "pcm":
-                // For PCM the codec itself carries the bit depth, so pick it directly.
-                bool bigEndian = o.Target.Extension == ".aiff";
+                // For PCM the codec itself carries the bit depth (and byte order) so pick it directly.
+                bool bigEndian = o.Target.Extension is ".aiff" or ".au";
                 a.Add("-c:a");
                 a.Add(!bigEndian
                     ? (o.BitDepth >= 24 ? "pcm_s24le" : "pcm_s16le")
@@ -122,12 +152,33 @@ public sealed class FfmpegEngine : IAudioEngine
 
             case "opus":
                 a.Add("-c:a"); a.Add("libopus");
-                a.Add("-b:a"); a.Add($"{o.BitrateKbps}k");
+                a.Add("-b:a"); a.Add($"{bitrate}k");
                 break;
 
             case "wma":
                 a.Add("-c:a"); a.Add("wmav2");
-                a.Add("-b:a"); a.Add($"{o.BitrateKbps}k");
+                a.Add("-b:a"); a.Add($"{bitrate}k");
+                break;
+
+            case "mp2":
+                a.Add("-c:a"); a.Add("mp2");
+                a.Add("-b:a"); a.Add($"{bitrate}k");
+                break;
+
+            case "ac3":
+                a.Add("-c:a"); a.Add("ac3");
+                a.Add("-b:a"); a.Add($"{bitrate}k");
+                break;
+
+            case "eac3":
+                a.Add("-c:a"); a.Add("eac3");
+                a.Add("-b:a"); a.Add($"{bitrate}k");
+                break;
+
+            case "amr":
+                // AMR-NB has fixed modes; 12.2 kbps is the best quality it offers.
+                a.Add("-c:a"); a.Add("libopencore_amrnb");
+                a.Add("-b:a"); a.Add("12.2k");
                 break;
 
             default:
@@ -138,11 +189,15 @@ public sealed class FfmpegEngine : IAudioEngine
         return a;
     }
 
-    /// <summary>FLAC and ALAC take a sample format; s32 is how ffmpeg writes 24-bit.</summary>
-    static void AddSampleFormat(List<string> a, int bitDepth)
+    /// <summary>
+    /// FLAC, ALAC and WavPack take a sample format; s32 is how ffmpeg writes 24-bit. ALAC and WavPack
+    /// require the planar variants (s16p / s32p) - the packed ones are rejected by those encoders.
+    /// </summary>
+    static void AddSampleFormat(List<string> a, int bitDepth, bool planar)
     {
+        string format = bitDepth >= 24 ? "s32" : "s16";
         a.Add("-sample_fmt");
-        a.Add(bitDepth >= 24 ? "s32" : "s16");
+        a.Add(planar ? format + "p" : format);
     }
 
     void Run(IReadOnlyList<string> args, CancellationToken ct)

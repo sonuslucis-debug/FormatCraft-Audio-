@@ -7,7 +7,7 @@ public static class AudioKinds
     public static readonly HashSet<string> Readable = new(StringComparer.OrdinalIgnoreCase)
     {
         ".mp3", ".wav", ".flac", ".aiff", ".aif", ".aifc", ".m4a", ".m4b", ".aac", ".ogg", ".oga",
-        ".opus", ".wma", ".wv", ".ape", ".caf", ".amr", ".au", ".mka", ".mp2", ".ac3", ".dts",
+        ".opus", ".wma", ".wv", ".ape", ".caf", ".amr", ".au", ".mka", ".mp2", ".ac3", ".eac3", ".dts",
         ".tta", ".dsf", ".dff", ".w64", ".rf64"
     };
 
