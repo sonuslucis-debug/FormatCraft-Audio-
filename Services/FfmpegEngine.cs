@@ -19,7 +19,18 @@ public sealed class FfmpegEngine : IAudioEngine
         string temp = outputPath + ".part" + options.Target.Extension;
         try
         {
-            Run(BuildArguments(inputPath, temp, options), ct);
+            bool includeCoverArt = options.KeepMetadata && options.Target.SupportsCoverArt;
+            try
+            {
+                Run(BuildArguments(inputPath, temp, options, includeCoverArt), ct);
+            }
+            catch (InvalidOperationException) when (includeCoverArt && !ct.IsCancellationRequested)
+            {
+                // Some inputs carry a picture the target container can't store (an odd art codec, or a WAV with
+                // an embedded image). Tags still come across, so retry once without the picture.
+                Run(BuildArguments(inputPath, temp, options, includeCoverArt: false), ct);
+            }
+
             File.Move(temp, outputPath, overwrite: false);
         }
         finally
@@ -32,7 +43,7 @@ public sealed class FfmpegEngine : IAudioEngine
     }
 
     /// <summary>The full ffmpeg command line for one file. Public so it can be inspected in tests.</summary>
-    public static IReadOnlyList<string> BuildArguments(string input, string output, AudioConvertOptions o)
+    public static IReadOnlyList<string> BuildArguments(string input, string output, AudioConvertOptions o, bool includeCoverArt = true)
     {
         var a = new List<string>
         {
@@ -44,7 +55,7 @@ public sealed class FfmpegEngine : IAudioEngine
         if (o.KeepMetadata)
         {
             a.AddRange(new[] { "-map_metadata", "0", "-map_chapters", "0" });
-            if (o.Target.SupportsCoverArt)
+            if (o.Target.SupportsCoverArt && includeCoverArt)
             {
                 // Cover art arrives as a video stream; copy it across untouched as an attached picture.
                 a.AddRange(new[] { "-map", "0:v?", "-c:v", "copy", "-disposition:v", "attached_pic" });
