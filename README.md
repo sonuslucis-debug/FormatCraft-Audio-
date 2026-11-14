@@ -40,6 +40,7 @@ Without a `Tools\ffmpeg.exe`, the app still builds but expects ffmpeg on the PAT
 
 - **Created by Sonus Lucis**: concept, design, direction, logos and artwork, and testing.
 - **Programmed by** DeepSeek V4.1 Flash Free, running in OpenCode: all of the code.
+- **Interface layout based on FormatCraft [Bitmap]**, programmed by Claude (Anthropic): the window structure and styling this app reuses.
 - **Audio processing:** [FFmpeg](https://ffmpeg.org) — see `THIRD-PARTY-NOTICES.txt`.
 - **Typeface:** Montserrat, by The Montserrat Project Authors, under the SIL Open Font License 1.1 (see `Fonts/OFL.txt`).
 

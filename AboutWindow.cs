@@ -63,6 +63,7 @@ public sealed class AboutWindow : Window
         AddLinkSection(panel, "Website", "https://sonuslucis.com", "sonuslucis.com");
         AddSection(panel, "Created by", "Sonus Lucis - concept, design, direction and testing");
         AddSection(panel, "Programmed by", "DeepSeek V4.1 Flash Free, running in OpenCode - all of the code");
+        AddSection(panel, "Interface", "Based on FormatCraft [Bitmap] - the window layout and styling were programmed by Claude, made by Anthropic");
         AddSection(panel, "Built with",
             "FFmpeg (https://ffmpeg.org), used under the terms of its licence. Everything is processed on your own " +
             "computer; no audio is ever uploaded anywhere.");
