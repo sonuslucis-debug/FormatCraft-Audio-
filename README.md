@@ -39,7 +39,7 @@ Without a `Tools\ffmpeg.exe`, the app still builds but expects ffmpeg on the PAT
 ## Credits
 
 - **Created by Sonus Lucis**: concept, design, direction, logos and artwork, and testing.
-- **Programmed by Claude**, made by Anthropic: all of the code.
+- **Programmed by** DeepSeek V4.1 Flash Free, running in OpenCode: all of the code.
 - **Audio processing:** [FFmpeg](https://ffmpeg.org) — see `THIRD-PARTY-NOTICES.txt`.
 - **Typeface:** Montserrat, by The Montserrat Project Authors, under the SIL Open Font License 1.1 (see `Fonts/OFL.txt`).
 
